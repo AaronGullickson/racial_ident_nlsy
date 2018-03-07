@@ -1,0 +1,423 @@
+---
+title: "Research notebook for biracial identification project"
+output:
+  pdf_document: 
+    toc: yes
+  html_document: 
+    toc: yes
+---
+
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+library(magrittr)
+library(ggplot2)
+library(lme4)
+library(lattice)
+library(pander)
+library(entropy)
+library(stargazer)
+library(arm)
+load("output/nlsy_processed.RData")
+load("output/analytical_samples.RData")
+```
+
+```{r some_functons, echo=FALSE}
+
+#function to update model if convergence fails
+check.convergence <- function(model, current_data, times=3) {
+  updates <- 0
+  while(!is.null(model@optinfo$conv$lme4$code) & updates<times) {
+      ss <- getME(model,c("theta","fixef"))
+      model <- update(model, data=current_data, start=ss)
+      updates <- updates+1
+  }
+  if(!is.null(model@optinfo$conv$lme4$code)) {
+    cat("\nModel failed to converge.")
+    cat(paste(model@call))
+    cat("\n")
+  }
+  return(model)
+}
+
+
+poolModels <- function(models) {
+  
+  b <- sapply(models, function(x) {summary(x)$coef[,"Estimate"]})
+  se <- sapply(models, function(x) {summary(x)$coef[,"Std. Error"]})
+
+  if(!is.null(nrow(b))) {
+    beta <- apply(b,1,mean)
+    between.var <- apply(b,1,var)
+    within.var <- apply(se^2,1,mean)
+    sterror <- sqrt(within.var+between.var+between.var/length(models))
+    tstat <- beta/sterror
+    pvalue <- (1-pnorm(abs(tstat)))*2
+    fixed <- list(beta=beta,se=sterror,tstat=tstat,pvalue=pvalue)
+  } else {
+    beta <- mean(b)
+    between.var <- var(b)
+    within.var <- mean(se^2)
+    sterror <- sqrt(within.var+between.var+between.var/length(models))
+    tstat <- beta/sterror
+    pvalue <- (1-pnorm(abs(tstat)))*2
+    names(beta) <- names(sterror) <- names(tstat) <- names(pvalue) <- "(Intercept)"
+    fixed <- list(beta=beta,se=sterror,tstat=tstat,pvalue=pvalue)
+  }
+  
+  rsd <- mean(sapply(models,function(x) {attr(VarCorr(x)$mixedrace_parent,"stddev")}))
+
+  rintercept_sd <- sapply(models, function(model) {sqrt(VarCorr(model)$mixedrace_parent)})
+  n_groups <- sapply(models, function(model) {nrow(ranef(model)$mixedrace_parent)})
+
+  #average random effecs
+  ranefs <- lapply(models, function(x) {ranef(x)$mixedrace_parent})
+  se.ranefs <- lapply(models, function(x) {se.ranef(x)$mixedrace_parent})
+
+  #average effects across imputations. The use of Reduce comes from:
+  #https://stackoverflow.com/questions/7651539/mean-of-elements-in-a-list-of-data-frames
+  reffects <- Reduce('+', ranefs)/length(ranefs)
+  var.reffects.within <- (Reduce('+', se.ranefs)/length(se.ranefs))^2
+  var.reffects.between <- Reduce('+', lapply(ranefs, function(x) {(x-reffects)^2}))/(length(ranefs)-1)
+  sd.reffects <- sqrt(var.reffects.within+var.reffects.between+var.reffects.between/length(ranefs))
+
+  rcorr <- Reduce('+',lapply(models,function(x) {attr(VarCorr(x)$mixedrace_parent,"correlation")}))/length(ranefs)
+
+  return(list(fixef=fixed,
+              rintercept_sd=rsd, n_groups=nrow(ranef(models[[1]])$mixedrace_parent),
+              ranef=reffects, ranef_sd=sd.reffects,
+              ranef_cor=rcorr))
+}
+
+convertRaceNames <- function(race) {
+  race <- gsub("^W$", "White", race)
+  race <- gsub("^B$", "Black", race)
+  race <- gsub("^I$", "AmIndian", race)
+  race <- gsub("^A$", "Asian", race)
+  race <- gsub("^H$", "Hispanic", race)
+  race <- gsub("^WB", "White/Black", race)
+  race <- gsub("^WI", "White/AmIndian", race)
+  race <- gsub("^WA", "White/Asian", race)
+  race <- gsub("^WH", "White/Hispanic", race)
+  race <- gsub("^BI", "Black/AmIndian", race)
+  race <- gsub("^BA", "Black/Asian", race)
+  race <- gsub("^BH", "Black/Hispanic", race)
+  race <- gsub("^IH", "AmIndian/Hispanic", race)
+  race <- gsub("^AH", "Asian/Hispanic", race)
+  race <- gsub("^BO", "Black/Asian or AmIndian", race)
+  race <- gsub("^OH", "Asian or AmIndian/Hispanic", race)
+  return(race)
+}
+
+```
+
+## Crosstabs of Racial Identification
+
+First, lets look at the cross-tabulation of father's and mother's race from the roster reports. 
+
+```{r parent_race, echo=FALSE, results='asis'}
+tab.prace <- table(nlsy$frace, nlsy$mrace)
+pandoc.table(tab.prace, caption="Father's reported race (row) by mother's reported race (column)",
+             justify="right")
+```
+
+Obviously a lot of action on the diagonals. The cell-sizes get pretty small when you move off the white father or white mother lines. Some biracial groups are not captured at all. 
+
+Now lets look at the full table of racial self-identification in 2002 based on the parental race identified from the roster data. 
+
+```{r race_correspondence_table, echo=FALSE, results='asis'}
+tab.rcorr <- table(nlsy$mixedrace_parent, nlsy$multirace02)
+#identify which of these cases would be considered consistent classification - this may need to be updated
+#if changes are made to underlying variables with regard to Hispanicity and other classification
+prtab <- matrix(rep(rownames(tab.rcorr), ncol(tab.rcorr)), dim(tab.rcorr))
+sftab <- matrix(rep(colnames(tab.rcorr), each=nrow(tab.rcorr)), dim(tab.rcorr))
+consistent <- prtab==sftab |
+  ((prtab=="WB" | prtab=="WI" | prtab=="BI") & sftab=="WBI") |
+  ((prtab=="WI" | prtab=="WH" | prtab=="IH") & sftab=="WIH")
+#at the the moment, I can't think of any other way around this but a for loop
+consistent <- consistent.broad <- matrix(FALSE, nrow(sftab), ncol(sftab))
+for(i in 1:nrow(prtab)) {
+  for(j in 1:ncol(prtab)) {
+    if(prtab[i,j]==sftab[i,j]) {
+      consistent[i,j] <- consistent.broad[i,j] <- TRUE
+    } else {
+      #also accept this as broadly consistent if single-race sftab is completely contained within prtab
+      if(nchar(prtab[i,j])>1 & nchar(sftab[i,j])==1) {
+        consistent.broad[i,j] <- grepl(sftab[i,j],prtab[i,j])
+      }
+      #also accept this as consistent if double race prtab is ccompletely contained within 3+ sftab
+      if(nchar(prtab[i,j])==2 & nchar(sftab[i,j])>2) {
+        consistent[i,j] <- consistent.broad[i,j] <- grepl(substr(prtab[i,j],1,1),sftab[i,j]) &
+          grepl(substr(prtab[i,j],2,2),sftab[i,j])
+      }
+    }
+  }
+}
+rownames(consistent) <- rownames(consistent.broad) <- rownames(tab.rcorr)
+colnames(consistent) <- colnames(consistent.broad) <- colnames(tab.rcorr)
+
+pandoc.table(tab.rcorr, justify="right", 
+             caption="Cross-tabulation of parentally-defined race (row) by racial self-identification in 2002 with consistent racial self-identification in bold.",
+             emphasize.strong.cells=which(consistent, arr.ind=TRUE), 
+             emphasize.italics.cells=which(consistent.broad, arr.ind=TRUE),
+             split.tables=Inf)
+```
+
+Obviously there is some heterogeneity in racial self-ID for all groups, but more for multiracial groups. For all multiracial groups, consistent ID is not the modal category whereas it is the modal category for single-race groups. 
+
+To look at this more closely, lets construct a couple of figures. First, lets construct a figure that shows the proportion of consistently identified individuals by parental race group with error bars. 
+
+## Figures showing racial consistency and heterogeneity of self ID
+
+```{r race_consistency_figure, echo=FALSE, warning=FALSE}
+p <- apply(prop.table(tab.rcorr,1)*consistent,1,sum)
+p.broad <- apply(prop.table(tab.rcorr,1)*consistent.broad,1,sum)
+#I am going to use the Miller Maddow sampling correction for entropy here, but also apply a scale adjustment
+#so that entropy estimates range from 0 to 1. 
+e <- apply(tab.rcorr,1, entropy.MillerMadow)*1/(-1*log(1/ncol(tab.rcorr)))
+n <- as.numeric(table(nlsy$mixedrace_parent))
+race_reporting <- rbind(data.frame(race=levels(nlsy$mixedrace_parent),
+                                   consistency="Exact",n,p_consistent=p,entropy=e),
+                        data.frame(race=levels(nlsy$mixedrace_parent),
+                                   consistency="Inclusive",n,p_consistent=p.broad,entropy=e))
+race_reporting$consistent_upper=with(race_reporting, p_consistent+sqrt(p_consistent*(1-p_consistent)/n)*qt(.975, n))
+race_reporting$consistent_upper <- ifelse(race_reporting$consistent_upper>1,1,race_reporting$consistent_upper)
+race_reporting$consistent_lower=with(race_reporting, p_consistent-sqrt(p_consistent*(1-p_consistent)/n)*qt(.975, n))
+race_reporting$consistent_lower <- ifelse(race_reporting$consistent_lower<0,0,race_reporting$consistent_lower)
+race_reporting$multiple_parent_race <- nchar(as.character(race_reporting$race))>1
+#remove inclusive definition for single race
+race_reporting[race_reporting$consistency=="Inclusive" & !race_reporting$multiple_parent_race,
+               c("p_consistent","consistent_lower","consistent_upper")] <- NA
+#sort race groups as main dataset
+race_reporting$race <- factor(race_reporting$race, 
+                    levels=levels(nlsy$mixedrace_parent),
+                    labels=convertRaceNames(levels(nlsy$mixedrace_parent)))
+ggplot(race_reporting, aes(x=race, y=p_consistent, group=consistency))+
+  geom_point(aes(size=n, colour=consistency))+
+  geom_errorbar(aes(ymin=consistent_lower, ymax=consistent_upper, colour=consistency), width=0.1)+
+  theme_bw()+xlab("Parentally identified race")+ylab("Proportion consistently self-identified")+coord_flip()
+```
+
+Now lets consider a measure of entropy which gets more at overall heterogeneity regardless of consistency. 
+
+```{r entropy_figure, echo=FALSE}
+#what about a measure of entropy
+ggplot(race_reporting, aes(x=race, y=entropy))+geom_point(aes(size=n))+
+  theme_bw()+xlab("Parentally identified race")+ylab("Heterogeneity in self-identification")+coord_flip()
+```
+
+How well does heterogeneity correlate with inconsistency?
+
+```{r compare_consistency_heterogeneity, echo=FALSE, warning=FALSE}
+ggplot(race_reporting, aes(x=p_consistent, y=entropy, label=race))+
+    geom_point(aes(size=n, colour=multiple_parent_race, shape=consistency), alpha=0.4)+
+  geom_text(check_overlap = FALSE, size=2, hjust=0, nudge_x=0.01)+
+  theme_bw()+xlab("Proportion consistently self-identified")+ylab("Heterogeneity in self-identification")
+```
+
+## Models
+
+Now I will focus on models predicting self-identification consistent with parentally identified race. The models will be HLM models with random intercepts for each race group and potentially random slopes for some individual characteristics. Group-level variables will also be entered and may be interacted with individual level variables. 
+
+All models are based on a multiple imputation with five complete datasets. 
+
+### Random Intercept Models
+
+The structure of the basic model is as follows:
+
+$$logit(p_{ij})=\beta_{0j}+\sum_{k=1}^p \beta_k(x_{ijk}-\bar{x}_{..k})$$
+$$\beta_{0j}=\alpha_0+\alpha_1(\texttt{hispanic parent}_j)+\alpha_2(\texttt{mixed race parentage}_j)+\upsilon_j$$
+
+The dependent variable is the the logit of the probability of consistent reporting of race ($p_ij$) for the $i$th respondent belonging to the $j$th parental race group. This outcome is then predicted by a set of individual level characteristics. Importantly, the model also includes a random intercept that allows the probability to vary by parental race group. This random intercept is then predicted in a second level equation by a combination of dummies for having a hispanic parent and being of mixed race parentage. The remaining $\upsilon_j$ random intercepts provide important information about differences in the reporting of racial consistency after accounting for a general lower level of consistency among individuals of hispanic and mixed-race parentage, some of which may be driven by survey instrument bias. All individual level independent variables are grand-mean centered, so the random intercepts "control" for these individual level characteristics. 
+
+I ran into some convergence problems with some of the more complex models here. I found that if I updated the models with the starting parameters from the last fit, as suggested [here](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html), the models generally converged, although in some cases it required doing this update multiple times.
+
+```{r formula_setup, echo=FALSE}
+formula.anova <- formula(race.consistent~(1 | mixedrace_parent))
+formula.basic <- update(formula.anova, .~.+multi.parent+anyhisp+informant)
+formula.demog <- update(formula.basic, .~.+age.ctr+twobio.ctr+moved_county.ctr+moved_out.ctr)
+formula.familybg <- update(formula.basic, .~.+parented.ctr+loghhinc.ctr)
+formula.attain <- update(formula.basic, .~.+noDiploma.ctr+college.ctr+hs.center)
+formula.full <- update(formula.basic, 
+                       .~.+age.ctr+twobio.ctr+moved_county.ctr+moved_out.ctr+
+                         parented.ctr+loghhinc.ctr+noDiploma.ctr+college.ctr+hs.center)
+formula.asvab <- update(formula.full, .~.+asvab+gpa.ctr)
+formula.controls <- update(formula.full, .~.+female.ctr+urban.ctr)
+```
+
+
+```{r models_rintercept, echo=FALSE, warning=FALSE, results='asis'}
+models.anova <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.anova, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.basic <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.basic, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.demog <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.demog, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.familybg <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.familybg, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.attain <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.attain, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.full <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.full, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.asvab <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.asvab, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+models.controls <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.controls, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
+pooled_results <- lapply(list(models.anova, models.basic, models.demog, 
+                              models.familybg, models.attain, models.full,
+                              models.asvab, models.controls),
+                         poolModels)
+rintercept_sd <- sapply(pooled_results, function(x) {x$rintercept_sd})
+n_groups <- sapply(pooled_results, function(x) {x$n_groups})
+
+stargazer(models.anova[[1]], models.basic[[1]], models.demog[[1]], models.familybg[[1]],
+          models.attain[[1]],models.full[[1]], models.asvab[[1]], models.controls[[1]],
+          coef=lapply(pooled_results, function(x) {x$fixef$beta}),
+          se=lapply(pooled_results, function(x) {x$fixef$se}),
+          t=lapply(pooled_results, function(x) {x$fixef$tstat}),
+          p=lapply(pooled_results, function(x) {x$fixef$pvalue}),
+          type="latex", keep.stat=c("n"), star.cutoffs=c(0.05,0.01), style = "demography",
+          add.lines = list(c("SD of random intercept",round(rintercept_sd,2)),
+                           c("Number of racial parentage groups",n_groups)),
+          covariate.labels=c("Multiple race parentage","Hispanic parent",
+                             "Informant, biological parent", "Informant, other",
+                             "Age", "Two-biological parent household",
+                             "Moved out of county","Moved out of parental home",
+                             "Highest parental yrs of educ",
+                             "Household income (logged)",
+                             "No high school diploma",
+                             "College degree or enrollment", 
+                             "Enrolled in high school",
+                             "CAT-ASVAB score","High school GPA", "Female",
+                             "Urban area"),
+          dep.var.labels="",
+          dep.var.caption = "",
+          title="Multilevel logistic regression model predicting whether self-identified race is the same as parentally-identified race.", 
+          notes=c("Reference categories are non-two biological parent household,",
+                  "respondent as parent race informant, stayed in the same county,",
+                  "and high school diploma not enrolled.",
+                  "All individual level variables are mean-centered.",
+                  "All models include random intercepts for racial parentage groups."),
+          notes.append=FALSE,
+          notes.align="l")
+```
+
+```{r figure_rintercept, echo=FALSE, fig.cap="Random intercepts of self-identification consistency for racial parentage groups, after accounting for a general effect of mixed race parentage and hispanic parentage."}
+reffects <- data.frame(parental_race=rownames(pooled_results[[2]]$ranef),
+                       effect=pooled_results[[2]]$ranef$`(Intercept)`, 
+                       sd=pooled_results[[2]]$ranef_sd)
+colnames(reffects) <- c("parental_race","effect","sd")
+reffects$upper <- reffects$effect+1.96*reffects$sd
+reffects$lower <- reffects$effect-1.96*reffects$sd
+ordered_race <- paste(reffects$parental_race)[order(reffects$effect)]
+reffects$parental_race <- factor(reffects$parental_race,
+                                levels=ordered_race, labels = convertRaceNames(ordered_race))
+ggplot(reffects, aes(x=parental_race, y=effect))+
+  geom_hline(yintercept=0, linetype=2)+
+  geom_linerange((aes(ymin=lower, ymax=upper)), colour="grey50")+
+  geom_point()+
+  coord_flip()+xlab("Racial parentage group")+ylab("Estimated effect size")+theme_bw()
+```
+
+### Models of white/black identification
+
+Ok, now try some models trying to predict whiteness/blackness among subset of respondents with some white/black ancestry
+```{r models_white_id, echo=FALSE, warning=FALSE, results='asis'}
+
+models.white <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(update(formula.full,I(multirace02=="W")~.), data=analytical_data, subset=anywhite,
+                 family=binomial)
+  model <- check.convergence(model,analytical_data,4)
+  return(model)
+})
+
+models.black <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(update(formula.full,I(multirace02=="B")~.), data=analytical_data, subset=anyblack,
+                 family=binomial)
+  model <- check.convergence(model,analytical_data,4)
+  return(model)
+})
+
+pooled_results_bw <- lapply(list(models.white, models.black),
+                         poolModels)
+rintercept_sd <- sapply(pooled_results_bw, function(x) {x$rintercept_sd})
+n_groups <- sapply(pooled_results_bw, function(x) {x$n_groups})
+
+stargazer(models.white[[1]], models.black[[1]],
+          coef=lapply(pooled_results_bw, function(x) {x$fixef$beta}),
+          se=lapply(pooled_results_bw, function(x) {x$fixef$se}),
+          t=lapply(pooled_results_bw, function(x) {x$fixef$tstat}),
+          p=lapply(pooled_results_bw, function(x) {x$fixef$pvalue}),
+          type="latex", keep.stat=c("n"),  star.cutoffs=c(0.05,0.01), style="demography",
+          add.lines = list(c("SD of random intercept",round(rintercept_sd,2)),
+                           c("Number of racial parentage groups",n_groups)),
+          covariate.labels=c("Multiple race parentage","Hispanic parent",
+                             "Informant, biological parent", "Informant, other",
+                             "Age", "Two-biological parent household",
+                             "Moved out of county","Moved out of parental home",
+                             "Highest parental yrs of educ",
+                             "Household income (logged)",
+                             "No high school diploma",
+                             "College degree or enrollment",
+                             "Enrolled in high school"),
+          dep.var.labels="",
+          dep.var.caption = "",
+          dep.var.labels.include = FALSE,
+          column.labels = c("White alone", "Black alone"),
+          title="Multilevel logistic regression model predicting whether self-identified race is white or black among racial parentage groups with white or black parent.", 
+          notes=c("Reference categories are non-two biological parent household,",
+                  "respondent as parent race informant, stayed in the same county,",
+                  "and high school diploma not enrolled.",
+                  "All individual level variables are mean-centered.",
+                  "All models include random intercepts for racial parentage groups."),
+          notes.append=FALSE,
+         notes.align="l")
+```
+
+```{r model_white_caterpillar, echo=FALSE, fig.cap="Catterpillar plot of racial parentage random intercepts predicting white identification for individuals with at least one white parent."}
+reffects <- data.frame(parental_race=rownames(pooled_results_bw[[1]]$ranef),
+                       effect=pooled_results_bw[[1]]$ranef$`(Intercept)`, 
+                       sd=pooled_results_bw[[1]]$ranef_sd)
+colnames(reffects) <- c("parental_race","effect","sd")
+reffects$upper <- reffects$effect+1.96*reffects$sd
+reffects$lower <- reffects$effect-1.96*reffects$sd
+ordered_race <- paste(reffects$parental_race)[order(reffects$effect)]
+reffects$parental_race <- factor(reffects$parental_race,
+                                levels=ordered_race, labels = convertRaceNames(ordered_race))
+ggplot(reffects, aes(x=parental_race, y=effect))+
+  geom_hline(yintercept=0, linetype=2)+
+  geom_linerange((aes(ymin=lower, ymax=upper)), colour="grey50")+
+  geom_point()+
+  coord_flip()+xlab("Racial parentage group")+ylab("Estimated effect size")+theme_bw()
+```

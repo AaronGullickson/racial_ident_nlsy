@@ -1,0 +1,64 @@
+
+
+Reference
+Number     Year  Variable Description                                              Question Name                
+------------------------------------------------------------------------------------------------------------------
+R00001.00  1997  PUBID, YOUTH CASE IDENTIFICATION CODE                             PUBID                        
+R05363.00  1997  KEY!SEX, RS GENDER (SYMBOL)                                       KEY!SEX                      
+R05364.01  1997  KEY!BDATE, RS BIRTHDATE MONTH/YEAR (SYMBOL)                       KEY!BDATE_M                  
+R05364.02  1997  KEY!BDATE, RS BIRTHDATE MONTH/YEAR (SYMBOL)                       KEY!BDATE_Y                  
+R05366.00  1997  KEY!AGE, RS CURRENT AGE (SYMBOL)                                  KEY!AGE                      
+R05386.00  1997  KEY!ETHNICITY, IS R HISPANIC (SYMBOL)                             KEY!ETHNICITY                
+R05387.00  1997  KEY!RACE, RACE OF R (SYMBOL)                                      KEY!RACE                     
+R11941.00  1997  RS AGE AT INTERVIEW DATE                                          CV_AGE_INT_DATE              
+R12002.00  1997  AGE OF BIO MOTHER WHEN R BORN                                     CV_BIO_MOM_AGE_YOUTH         
+R12003.00  1997  CENSUS REGION OF RESIDENCE                                        CV_CENSUS_REGION             
+R12042.00  1997  # GRADES R HAS EVER REPEATED                                      CV_GRADES_REPEAT_EVER        
+R12045.00  1997  GROSS HH INCOME IN PAST YEAR                                      CV_INCOME_GROSS_YR           
+R12046.00  1997  HOUSEHOLD INCOME FROM PARENT OR R                                 CV_HH_INCOME_SOURCE          
+R12047.00  1997  NET WORTH OF HOUSEHOLD ACCORDING TO PARENT                        CV_HH_NET_WORTH_P            
+R12050.00  1997  RELATIONSHIP TO PARENT FIGURES WHEN R AGE 12                      CV_YTH_REL_HH_AGE_12         
+R12051.00  1997  RELATIONSHIP TO PARENT FIGURES WHEN R AGE 2                       CV_YTH_REL_HH_AGE_2          
+R12052.00  1997  RELATIONSHIP TO PARENT FIGURES WHEN R AGE 6                       CV_YTH_REL_HH_AGE_6          
+R12053.00  1997  RS RELATIONSHIP TO HOUSEHOLD PARENT FIGURE                        CV_YTH_REL_HH_CURRENT        
+R12054.00  1997  HOUSEHOLD SIZE                                                    CV_HH_SIZE                   
+R12055.00  1997  NUMBER OF HOUSEHOLD MEMBERS UNDER AGE 18                          CV_HH_UNDER_18               
+R12175.00  1997  CURRENT RESIDENCE IN URBAN OR RURAL AREA                          CV_URBAN-RURAL               
+R12358.00  1997  SAMPLE TYPE.  CROSS-SECTIONAL OR OVERSAMPLE                       CV_SAMPLE_TYPE               
+R12361.01  1997  ROUND 1 SAMPLING WEIGHT CUMULATIVE CASES METHOD                   SAMPLING_WEIGHT_CC           
+R12362.01  1997  ROUND 1 SAMPLING WEIGHT PANEL METHOD                              SAMPLING_PANEL_WEIGHT        
+R13024.00  1997  BIOLOGICAL FATHERS HIGHEST GRADE COMPLETED                        CV_HGC_BIO_DAD               
+R13025.00  1997  BIOLOGICAL MOTHERS HIGHEST GRADE COMPLETED                        CV_HGC_BIO_MOM               
+R13026.00  1997  RESIDENTIAL FATHERS HIGHEST GRADE COMPLETED                       CV_HGC_RES_DAD               
+R13027.00  1997  RESIDENTIAL MOTHERS HIGHEST GRADE COMPLETED                       CV_HGC_RES_MOM               
+R14826.00  1997  KEY!RACE_ETHNICITY, COMBINED RACE AND ETHNICITY (SYMBOL)          KEY!RACE_ETHNICITY           
+R14897.00  1997  VARIANCE STRATUM                                                  VSTRAT                       
+R14898.00  1997  VARIANCE PSU                                                      VPSU                         
+R97929.00  HSTR  GPA FOR LAST YEAR                                                 TRANS_GPA                    
+R98296.00  1999  ASVAB MATH_VERBAL SCORE PERCENT                                   ASVAB_MATH_VERBAL_SCORE_PCT  
+R98320.00  HSTR  TRANSCRIPT WAVE                                                   TRANS_WAVE                   
+R98596.00  HSTR  TRANSCRIPT STATUS                                                 TRANS_STATUS                 
+R98719.00  HSTR  TRANS CRD GPA ALL                                                 TRANS_CRD_GPA_OVERALL        
+R98725.00  HSTR  TRANS PROB FLAG                                                   TRANS_PROBFLAG               
+S01910.00  2002  IS R HISPANIC, LATINO, OR OF SPANISH ORIGIN?                      YHHI-55700A1                 
+S01911.00  2002  R'S RACE (SELECT ONE)                                             YHHI-55700A2                 
+S12248.00  2002  R'S ETHNICITY (HEALTH)                                            YHEA-50                      
+S12249.00  2002  R'S RACE (HEALTH): WHITE                                          YHEA-60~000001               
+S12249.01  2002  R'S RACE (HEALTH): BLACK OR AFRICAN AMERICAN                      YHEA-60~000002               
+S12249.02  2002  R'S RACE (HEALTH): ASIAN                                          YHEA-60~000003               
+S12249.03  2002  R'S RACE (HEALTH): HAWAIIAN OR OTHER PACIFIC ISLANDER             YHEA-60~000004               
+S12249.04  2002  R'S RACE (HEALTH): AMERICAN INDIAN OR ALASKAN NATIVE              YHEA-60~000005               
+S12249.05  2002  R'S RACE (HEALTH): OTHER                                          YHEA-60~000006               
+S12249.06  2002  R'S RACE (HEALTH): R REFUSES TO CLASSIFY RACE EXCEPT AS HISPANIC  YHEA-60~000007               
+S12249.07  2002  R'S RACE (HEALTH): SUPERVISOR REVIEW                              YHEA-60~000995               
+S12249.08  2002  R'S RACE (HEALTH) - UNCODABLE                                     YHEA-60~000999               
+S15301.00  2002  2002 MIGRATION HISTORY (LOCATION) SINCE DLI 01                    CV_MIGRATE.01                
+S15313.00  2002  RS AGE IN MONTHS AS OF INTERVIEW DATE                             CV_AGE(MONTHS)_INT_DATE      
+S15314.00  2002  RS AGE AT INTERVIEW DATE                                          CV_AGE_INT_DATE              
+S15355.00  2002  CENSUS REGION OF RESIDENCE                                        CV_CENSUS_REGION             
+S15380.01  2002  RS CURRENT ENROLLMENT STATUS EDT                                  CV_ENROLLSTAT_EDT            
+S15416.01  2002  RS HIGHEST GRADE COMPLETED PRIOR TO THE 02/03 ACAD YEAR           CV_HGC_0203                  
+S15420.00  2002  RS RELATIONSHIP TO HOUSEHOLD PARENT FIGURE                        CV_YTH_REL_HH_CURRENT        
+S15643.00  2002  CURRENT RESIDENCE IN URBAN OR RURAL AREA                          CV_URBAN-RURAL               
+S15981.00  2002  ROUND 6 SAMPLING WEIGHT CUMULATIVE CASES METHOD                   SAMPLING_WEIGHT_CC           
+S15982.00  2002  ROUND 6 SAMPLING WEIGHT PANEL METHOD                              SAMPLING_PANEL_WEIGHT        
