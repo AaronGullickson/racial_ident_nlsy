@@ -11,7 +11,7 @@ rm *.html
 Rscript check_packages.R
 
 # Process and clean the raw data, send output to log directory as HTML
-Rscript -e "rmarkdown::render('process_raw_data.R',output_format='pdf_document',output_file='process_raw_data.pdf',output_dir='logs')"
+Rscript -e "rmarkdown::render('process_raw_data.R',output_format='html_document',output_file='process_raw_data.html',output_dir='logs')"
 
 # do multiple imputation and save analytical datasets
 Rscript mimputation.R

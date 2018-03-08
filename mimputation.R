@@ -13,7 +13,7 @@ load("output/nlsy_processed.RData")
 #Put all variables that should be imputed onto this chain. Don't put mixedrace_parent here
 variables_to_impute <- c("gender","age","urban97","region97","family","fage",
                          "mage","migration","informant","moved_out","highparented",
-                         "hhinc","asvab","gpa_overall","enrollment02","multirace02")
+                         "hhinc","hhsize","asvab","gpa_overall","enrollment02","multirace02")
 
 
 # Run Imputation ----------------------------------------------------------
@@ -72,6 +72,9 @@ analytical_samples <- lapply(analytical_samples, function(analytical_data) {
     mean(as.numeric(analytical_data$enrollment02=="Enrolled in HS"))
   analytical_data$gpa.ctr <- analytical_data$gpa_overall-mean(analytical_data$gpa_overall)
 
+  analytical_data$logpcinc.ctr <- log(analytical_data$hhinc/analytical_data$hhsize)-
+    mean(log(analytical_data$hhinc/analytical_data$hhsize))
+  
   #create dummy for either parent being id'ed as hispanic or white
   analytical_data$anyhisp <- grepl("H", analytical_data$mixedrace_parent)
   analytical_data$anywhite <- grepl("W", analytical_data$mixedrace_parent)

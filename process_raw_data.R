@@ -59,6 +59,9 @@ table(demog$family, demog$hh2002)
 demog$moved_out <- demog$family!="Something else" & demog$hh2002=="Something else"
 summary(demog$moved_out)
 
+# HOUSEHOLD SIZE
+demog$hhsize <- demog$R1205400
+
 # PARENTAL EDUCATION
 demog$biodaded <- ifelse(demog$R1302400<0 | demog$R1302400>20,NA,demog$R1302400)
 demog$biomomed <- ifelse(demog$R1302500<0 | demog$R1302500>20,NA,demog$R1302500)
@@ -319,7 +322,7 @@ summary(parents)
 demog <- subset(demog,
                 select = c("id","gender","age","urban97","region97","migration",
                            "moved_out","family","hhinc","highparented","asvab",
-                           "gpa_overall","enrollment02","multirace02"))
+                           "gpa_overall","enrollment02","multirace02","hhsize"))
 
 parents <- subset(parents,
                   select=c("id","informant","fage","mage","mixedrace_parent",

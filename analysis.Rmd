@@ -1,9 +1,9 @@
 ---
 title: "Research notebook for biracial identification project"
 output:
-  pdf_document: 
-    toc: yes
   html_document: 
+    toc: yes
+  pdf_document: 
     toc: yes
 ---
 
@@ -242,6 +242,7 @@ formula.full <- update(formula.basic,
                          parented.ctr+loghhinc.ctr+noDiploma.ctr+college.ctr+hs.center)
 formula.asvab <- update(formula.full, .~.+asvab+gpa.ctr)
 formula.controls <- update(formula.full, .~.+female.ctr+urban.ctr)
+formula.pcinc <- update(formula.full, .~.-loghhinc.ctr+logpcinc.ctr)
 ```
 
 
@@ -294,37 +295,45 @@ models.controls <- lapply(analytical_samples, function(analytical_data) {
   return(model)
 })
 
+models.pcinc <- lapply(analytical_samples, function(analytical_data) {
+  model <- glmer(formula.pcinc, data=analytical_data, family=binomial)
+  model <- check.convergence(model, analytical_data)
+  return(model)
+})
+
 pooled_results <- lapply(list(models.anova, models.basic, models.demog, 
                               models.familybg, models.attain, models.full,
-                              models.asvab, models.controls),
+                              models.asvab, models.controls, models.pcinc),
                          poolModels)
 rintercept_sd <- sapply(pooled_results, function(x) {x$rintercept_sd})
 n_groups <- sapply(pooled_results, function(x) {x$n_groups})
 
 stargazer(models.anova[[1]], models.basic[[1]], models.demog[[1]], models.familybg[[1]],
           models.attain[[1]],models.full[[1]], models.asvab[[1]], models.controls[[1]],
+          models.pcinc[[1]],
           coef=lapply(pooled_results, function(x) {x$fixef$beta}),
           se=lapply(pooled_results, function(x) {x$fixef$se}),
           t=lapply(pooled_results, function(x) {x$fixef$tstat}),
           p=lapply(pooled_results, function(x) {x$fixef$pvalue}),
-          type="latex", keep.stat=c("n"), star.cutoffs=c(0.05,0.01), style = "demography",
+          type="html", keep.stat=c("n"), star.cutoffs=c(0.05,0.01,0.001),
           add.lines = list(c("SD of random intercept",round(rintercept_sd,2)),
                            c("Number of racial parentage groups",n_groups)),
           covariate.labels=c("Multiple race parentage","Hispanic parent",
-                             "Informant, biological parent", "Informant, other",
-                             "Age", "Two-biological parent household",
-                             "Moved out of county","Moved out of parental home",
-                             "Highest parental yrs of educ",
-                             "Household income (logged)",
-                             "No high school diploma",
-                             "College degree or enrollment", 
-                             "Enrolled in high school",
-                             "CAT-ASVAB score","High school GPA", "Female",
-                             "Urban area"),
+                            "Informant, biological parent", "Informant, other",
+                            "Age", "Two-biological parent household",
+                            "Moved out of county","Moved out of parental home",
+                            "Highest parental years of education",
+                            "Household income (logged)",
+                            "No high school diploma, not enrolled",
+                            "College degree or college enrollment", 
+                            "Enrolled in high school",
+                            "CAT-ASVAB score","High school GPA", "Female",
+                            "Urban area","per capita income (logged)"),
           dep.var.labels="",
           dep.var.caption = "",
           title="Multilevel logistic regression model predicting whether self-identified race is the same as parentally-identified race.", 
-          notes=c("Reference categories are non-two biological parent household,",
+          notes=c("<em>&#42;p&lt;0.05;&#42;&#42;p&lt;0.01;&#42;&#42;&#42;p&lt;0.001</em>",
+                  "Reference categories are non-two biological parent household,",
                   "respondent as parent race informant, stayed in the same county,",
                   "and high school diploma not enrolled.",
                   "All individual level variables are mean-centered.",
@@ -379,24 +388,25 @@ stargazer(models.white[[1]], models.black[[1]],
           se=lapply(pooled_results_bw, function(x) {x$fixef$se}),
           t=lapply(pooled_results_bw, function(x) {x$fixef$tstat}),
           p=lapply(pooled_results_bw, function(x) {x$fixef$pvalue}),
-          type="latex", keep.stat=c("n"),  star.cutoffs=c(0.05,0.01), style="demography",
+          type="html", keep.stat=c("n"),  star.cutoffs=c(0.05,0.01,0.001),
           add.lines = list(c("SD of random intercept",round(rintercept_sd,2)),
                            c("Number of racial parentage groups",n_groups)),
           covariate.labels=c("Multiple race parentage","Hispanic parent",
                              "Informant, biological parent", "Informant, other",
                              "Age", "Two-biological parent household",
                              "Moved out of county","Moved out of parental home",
-                             "Highest parental yrs of educ",
+                             "Highest parental years of education",
                              "Household income (logged)",
-                             "No high school diploma",
-                             "College degree or enrollment",
+                             "No high school diploma, not enrolled",
+                             "College degree or college enrollment",
                              "Enrolled in high school"),
           dep.var.labels="",
           dep.var.caption = "",
           dep.var.labels.include = FALSE,
           column.labels = c("White alone", "Black alone"),
           title="Multilevel logistic regression model predicting whether self-identified race is white or black among racial parentage groups with white or black parent.", 
-          notes=c("Reference categories are non-two biological parent household,",
+          notes=c("<em>&#42;p&lt;0.05;&#42;&#42;p&lt;0.01;&#42;&#42;&#42;p&lt;0.001</em>",
+                  "Reference categories are non-two biological parent household,",
                   "respondent as parent race informant, stayed in the same county,",
                   "and high school diploma not enrolled.",
                   "All individual level variables are mean-centered.",
