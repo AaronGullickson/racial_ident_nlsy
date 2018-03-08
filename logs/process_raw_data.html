@@ -118,7 +118,7 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">processRawData.R</h1>
-<h4 class="date"><em>Wed Mar 7 21:06:17 2018</em></h4>
+<h4 class="date"><em>Thu Mar 8 09:33:01 2018</em></h4>
 
 </div>
 
@@ -479,9 +479,10 @@ multirace.other &lt;- paste(ifelse(white02,&quot;W&quot;,&quot;&quot;),
 multirace.other &lt;- factor(multirace.other,
                             levels=c(&quot;W&quot;,&quot;B&quot;,&quot;I&quot;,&quot;A&quot;,&quot;H&quot;,&quot;O&quot;,
                                      &quot;WB&quot;,&quot;WI&quot;,&quot;WA&quot;,&quot;WH&quot;,&quot;WO&quot;,&quot;BI&quot;,&quot;BA&quot;,&quot;BH&quot;,&quot;BO&quot;,&quot;IA&quot;,&quot;IH&quot;,&quot;IO&quot;,&quot;AH&quot;,&quot;AO&quot;,&quot;HO&quot;,
-                                     &quot;WBI&quot;,&quot;WBA&quot;,&quot;WBH&quot;,&quot;WBO&quot;,&quot;WIA&quot;,&quot;WIH&quot;,&quot;WIO&quot;,&quot;WAH&quot;,&quot;WAO&quot;,&quot;BIA&quot;,&quot;BIH&quot;,&quot;BIO&quot;,&quot;BAH&quot;,&quot;BAO&quot;,&quot;IAH&quot;,&quot;IAO&quot;,&quot;AHO&quot;,
-                                     &quot;WBIA&quot;,&quot;WBIH&quot;,&quot;WBIO&quot;,&quot;WBAH&quot;,&quot;WBAO&quot;,&quot;WIAH&quot;,&quot;WIAO&quot;,&quot;BIAH&quot;,&quot;BIAO&quot;,&quot;IAHO&quot;,
-                                     &quot;WBIAH&quot;,&quot;WBIAO&quot;,&quot;WBIAHO&quot;))
+                                     &quot;WBI&quot;,&quot;WBA&quot;,&quot;WBH&quot;,&quot;WBO&quot;,&quot;WIA&quot;,&quot;WIH&quot;,&quot;WIO&quot;,&quot;WAH&quot;,&quot;WAO&quot;,&quot;WHO&quot;,&quot;BIA&quot;,&quot;BIH&quot;,&quot;BIO&quot;,&quot;BAH&quot;,&quot;BAO&quot;,&quot;BHO&quot;,&quot;IAH&quot;,&quot;IAO&quot;,&quot;IHO&quot;,&quot;AHO&quot;,
+                                     &quot;WBIA&quot;,&quot;WBIH&quot;,&quot;WBIO&quot;,&quot;WBAH&quot;,&quot;WBAO&quot;,&quot;WBHO&quot;,&quot;WIAH&quot;,&quot;WIAO&quot;,&quot;WIHO&quot;,&quot;WAHO&quot;,&quot;BIAH&quot;,&quot;BIAO&quot;,&quot;BAHO&quot;,&quot;BIHO&quot;,&quot;IAHO&quot;,
+                                     &quot;WBIAH&quot;,&quot;WBIAO&quot;,&quot;WBIHO&quot;,&quot;WBAHO&quot;,&quot;WIAHO&quot;,&quot;BIAHO&quot;,
+                                     &quot;WBIAHO&quot;))
 table(multirace.other, droplevels(demog$multirace02), exclude=NULL)</code></pre>
 <pre><code>##                
 ## multirace.other    W    B    I    A    H   WB   WI   WA   WH   BI   BA
@@ -515,28 +516,40 @@ table(multirace.other, droplevels(demog$multirace02), exclude=NULL)</code></pre>
 ##          WIO       0    0    0    0    0    0    3    0    0    0    0
 ##          WAH       0    0    0    0    0    0    0    0    0    0    0
 ##          WAO       0    0    0    0    0    0    0    5    0    0    0
+##          WHO       0    0    0    0    0    0    0    0   11    0    0
 ##          BIA       0    0    0    0    0    0    0    0    0    0    0
 ##          BIH       0    0    0    0    0    0    0    0    0    0    0
 ##          BIO       0    0    0    0    0    0    0    0    0    0    0
 ##          BAH       0    0    0    0    0    0    0    0    0    0    0
 ##          BAO       0    0    0    0    0    0    0    0    0    0    1
+##          BHO       0    0    0    0    0    0    0    0    0    0    0
 ##          IAH       0    0    0    0    0    0    0    0    0    0    0
 ##          IAO       0    0    0    0    0    0    0    0    0    0    0
+##          IHO       0    0    0    0    0    0    0    0    0    0    0
 ##          AHO       0    0    0    0    0    0    0    0    0    0    0
 ##          WBIA      0    0    0    0    0    0    0    0    0    0    0
 ##          WBIH      0    0    0    0    0    0    0    0    0    0    0
 ##          WBIO      0    0    0    0    0    0    0    0    0    0    0
 ##          WBAH      0    0    0    0    0    0    0    0    0    0    0
 ##          WBAO      0    0    0    0    0    0    0    0    0    0    0
+##          WBHO      0    0    0    0    0    0    0    0    0    0    0
 ##          WIAH      0    0    0    0    0    0    0    0    0    0    0
 ##          WIAO      0    0    0    0    0    0    0    0    0    0    0
+##          WIHO      0    0    0    0    0    0    0    0    0    0    0
+##          WAHO      0    0    0    0    0    0    0    0    0    0    0
 ##          BIAH      0    0    0    0    0    0    0    0    0    0    0
 ##          BIAO      0    0    0    0    0    0    0    0    0    0    0
+##          BAHO      0    0    0    0    0    0    0    0    0    0    0
+##          BIHO      0    0    0    0    0    0    0    0    0    0    0
 ##          IAHO      0    0    0    0    0    0    0    0    0    0    0
 ##          WBIAH     0    0    0    0    0    0    0    0    0    0    0
 ##          WBIAO     0    0    0    0    0    0    0    0    0    0    0
+##          WBIHO     0    0    0    0    0    0    0    0    0    0    0
+##          WBAHO     0    0    0    0    0    0    0    0    0    0    0
+##          WIAHO     0    0    0    0    0    0    0    0    0    0    0
+##          BIAHO     0    0    0    0    0    0    0    0    0    0    0
 ##          WBIAHO    0    0    0    0    0    0    0    0    0    0    0
-##          &lt;NA&gt;      0    0    0    0    0    0    0    0   11    0    0
+##          &lt;NA&gt;      0    0    0    0    0    0    0    0    0    0    0
 ##                
 ## multirace.other   BH   AH  WBI  WIH &lt;NA&gt;
 ##          W         0    0    0    0    0
@@ -569,28 +582,95 @@ table(multirace.other, droplevels(demog$multirace02), exclude=NULL)</code></pre>
 ##          WIO       0    0    0    0    0
 ##          WAH       0    0    0    0    0
 ##          WAO       0    0    0    0    0
+##          WHO       0    0    0    0    0
 ##          BIA       0    0    0    0    0
 ##          BIH       0    0    0    0    0
 ##          BIO       0    0    0    0    0
 ##          BAH       0    0    0    0    0
 ##          BAO       0    0    0    0    0
+##          BHO       9    0    0    0    0
 ##          IAH       0    0    0    0    0
 ##          IAO       0    0    0    0    0
+##          IHO       0    0    0    0    0
 ##          AHO       0    3    0    0    0
 ##          WBIA      0    0    0    0    0
 ##          WBIH      0    0    0    0    0
 ##          WBIO      0    0    0    0    0
 ##          WBAH      0    0    0    0    0
 ##          WBAO      0    0    0    0    0
+##          WBHO      0    0    0    0    0
 ##          WIAH      0    0    0    0    0
 ##          WIAO      0    0    0    0    0
+##          WIHO      0    0    0    1    0
+##          WAHO      0    0    0    0    0
 ##          BIAH      0    0    0    0    0
 ##          BIAO      0    0    0    0    0
+##          BAHO      0    0    0    0    0
+##          BIHO      0    0    0    0    0
 ##          IAHO      0    0    0    0    0
 ##          WBIAH     0    0    0    0    0
 ##          WBIAO     0    0    0    0    0
+##          WBIHO     0    0    0    0    0
+##          WBAHO     0    0    0    0    0
+##          WIAHO     0    0    0    0    0
+##          BIAHO     0    0    0    0    0
 ##          WBIAHO    0    0    0    0    0
-##          &lt;NA&gt;      9    0    0    1   10</code></pre>
+##          &lt;NA&gt;      0    0    0    0   10</code></pre>
+<pre class="r"><code>#lets also look at the distribution of race for those who reported other
+#alone or in combination
+table(multirace.other[!is.na(other02) &amp; other02==TRUE], exclude=NULL)</code></pre>
+<pre><code>## 
+##      W      B      I      A      H      O     WB     WI     WA     WH 
+##      0      0      0      0      0     32      0      0      0      0 
+##     WO     BI     BA     BH     BO     IA     IH     IO     AH     AO 
+##      2      0      0      0      2      0      0      1      0     14 
+##     HO    WBI    WBA    WBH    WBO    WIA    WIH    WIO    WAH    WAO 
+##    292      0      0      0     12      0      0      3      0      5 
+##    WHO    BIA    BIH    BIO    BAH    BAO    BHO    IAH    IAO    IHO 
+##     11      0      0      0      0      1      9      0      0      0 
+##    AHO   WBIA   WBIH   WBIO   WBAH   WBAO   WBHO   WIAH   WIAO   WIHO 
+##      3      0      0      0      0      0      0      0      0      1 
+##   WAHO   BIAH   BIAO   BAHO   BIHO   IAHO  WBIAH  WBIAO  WBIHO  WBAHO 
+##      0      0      0      0      0      0      0      0      0      0 
+##  WIAHO  BIAHO WBIAHO 
+##      0      0      0</code></pre>
+<pre class="r"><code>#compare to hispanic question in 2002
+demog$hispanic &lt;- ifelse(demog$S1224800&lt;0, NA, demog$S1224800)==1
+
+table(demog$multirace02, demog$hispanic)</code></pre>
+<pre><code>##        
+##         FALSE TRUE
+##   W      3879  647
+##   B      2047   30
+##   I        35   20
+##   A       161    9
+##   H         9  857
+##   WB       46    3
+##   WI       30   15
+##   WA       17    1
+##   WH        3   16
+##   BI        7    0
+##   BA        4    0
+##   BH        2    7
+##   IA        0    0
+##   IH        0    0
+##   AH        1    3
+##   WBI       2    0
+##   WBA       0    0
+##   WBH       0    0
+##   WIA       0    0
+##   WIH       0    1
+##   WAH       0    0
+##   BIA       0    0
+##   BIH       0    0
+##   BAH       0    0
+##   IAH       0    0
+##   WBIA      0    0
+##   WBIH      0    0
+##   WBAH      0    0
+##   WIAH      0    0
+##   BIAH      0    0
+##   WBIAH     0    0</code></pre>
 <pre class="r"><code># Collect Roster Data -----------------------------------------------------
 
 # The demographic information is listed in columns for each household member and
@@ -809,7 +889,8 @@ summary(parents)</code></pre>
 demog &lt;- subset(demog,
                 select = c(&quot;id&quot;,&quot;gender&quot;,&quot;age&quot;,&quot;urban97&quot;,&quot;region97&quot;,&quot;migration&quot;,
                            &quot;moved_out&quot;,&quot;family&quot;,&quot;hhinc&quot;,&quot;highparented&quot;,&quot;asvab&quot;,
-                           &quot;gpa_overall&quot;,&quot;enrollment02&quot;,&quot;multirace02&quot;,&quot;hhsize&quot;))
+                           &quot;gpa_overall&quot;,&quot;enrollment02&quot;,&quot;multirace02&quot;,&quot;hhsize&quot;,
+                           &quot;hispanic&quot;))
 
 parents &lt;- subset(parents,
                   select=c(&quot;id&quot;,&quot;informant&quot;,&quot;fage&quot;,&quot;mage&quot;,&quot;mixedrace_parent&quot;,
@@ -866,22 +947,22 @@ summary(nlsy)</code></pre>
 ##  3rd Qu.:3.280   Enrolled in 2-yr college  : 726   I      :  51  
 ##  Max.   :4.110   (Other)                   :1124   WI     :  39  
 ##  NA's   :2033    NA's                      :  17   (Other):  92  
-##      hhsize            informant         fage            mage       
-##  Min.   : 2.000   Self      : 307   Min.   : 0.00   Min.   :  0.00  
-##  1st Qu.: 4.000   Bio Parent:5669   1st Qu.:38.00   1st Qu.: 36.00  
-##  Median : 4.000   Other     : 897   Median :42.00   Median : 39.00  
-##  Mean   : 4.564                     Mean   :42.24   Mean   : 39.76  
-##  3rd Qu.: 5.000                     3rd Qu.:46.00   3rd Qu.: 43.00  
-##  Max.   :16.000                     Max.   :81.00   Max.   :117.00  
-##                                     NA's   :329     NA's   :122     
-##  mixedrace_parent      frace           mrace     
-##  W      :3441     White   :3641   White   :3686  
-##  B      :1630     Black   :1731   Black   :1676  
-##  H      :1143     AmIndian:  44   AmIndian:  54  
-##  WH     : 285     Asian   : 119   Asian   : 142  
-##  A      : 106     Hispanic:1338   Hispanic:1315  
-##  WB     :  72                                    
-##  (Other): 196</code></pre>
+##      hhsize        hispanic            informant         fage      
+##  Min.   : 2.000   Mode :logical   Self      : 307   Min.   : 0.00  
+##  1st Qu.: 4.000   FALSE:5494      Bio Parent:5669   1st Qu.:38.00  
+##  Median : 4.000   TRUE :1377      Other     : 897   Median :42.00  
+##  Mean   : 4.564   NA's :2                           Mean   :42.24  
+##  3rd Qu.: 5.000                                     3rd Qu.:46.00  
+##  Max.   :16.000                                     Max.   :81.00  
+##                                                     NA's   :329    
+##       mage        mixedrace_parent      frace           mrace     
+##  Min.   :  0.00   W      :3441     White   :3641   White   :3686  
+##  1st Qu.: 36.00   B      :1630     Black   :1731   Black   :1676  
+##  Median : 39.00   H      :1143     AmIndian:  44   AmIndian:  54  
+##  Mean   : 39.76   WH     : 285     Asian   : 119   Asian   : 142  
+##  3rd Qu.: 43.00   A      : 106     Hispanic:1338   Hispanic:1315  
+##  Max.   :117.00   WB     :  72                                    
+##  NA's   :122      (Other): 196</code></pre>
 <pre class="r"><code>#table of multiple race response by parental race response
 with(nlsy, table(multirace02, mixedrace_parent, exclude=NULL))</code></pre>
 <pre><code>##            mixedrace_parent
@@ -927,6 +1008,28 @@ with(nlsy, table(frace, mrace, exclude=NULL))</code></pre>
 ##   AmIndian    21     3       18     0        2
 ##   Asian       13     0        0   106        0
 ##   Hispanic   147    35        8     5     1143</code></pre>
+<pre class="r"><code>#table of hispanic by mixedrace_parent
+with(nlsy, table(mixedrace_parent, hispanic, exclude=NULL))</code></pre>
+<pre><code>##                 hispanic
+## mixedrace_parent FALSE TRUE &lt;NA&gt;
+##               W   3393   47    1
+##               B   1619   10    1
+##               I     17    1    0
+##               A    102    4    0
+##               H     43 1100    0
+##               WB    70    2    0
+##               WI    47    1    0
+##               WA    40    0    0
+##               WH   113  172    0
+##               BI     4    0    0
+##               BA     3    1    0
+##               BH    39   28    0
+##               IH     1    9    0
+##               AH     3    2    0</code></pre>
+<pre class="r"><code>#what proportion of those who identified as Hispanic had at least
+#one Hispanic-identified parent.
+with(subset(nlsy, hispanic), mean(grepl(&quot;H&quot;,mixedrace_parent)))</code></pre>
+<pre><code>## [1] 0.9520697</code></pre>
 <pre class="r"><code>save(nlsy, file=&quot;output/nlsy_processed.RData&quot;)</code></pre>
 
 

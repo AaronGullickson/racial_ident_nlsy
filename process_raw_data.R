@@ -170,10 +170,20 @@ multirace.other <- paste(ifelse(white02,"W",""),
 multirace.other <- factor(multirace.other,
                             levels=c("W","B","I","A","H","O",
                                      "WB","WI","WA","WH","WO","BI","BA","BH","BO","IA","IH","IO","AH","AO","HO",
-                                     "WBI","WBA","WBH","WBO","WIA","WIH","WIO","WAH","WAO","BIA","BIH","BIO","BAH","BAO","IAH","IAO","AHO",
-                                     "WBIA","WBIH","WBIO","WBAH","WBAO","WIAH","WIAO","BIAH","BIAO","IAHO",
-                                     "WBIAH","WBIAO","WBIAHO"))
+                                     "WBI","WBA","WBH","WBO","WIA","WIH","WIO","WAH","WAO","WHO","BIA","BIH","BIO","BAH","BAO","BHO","IAH","IAO","IHO","AHO",
+                                     "WBIA","WBIH","WBIO","WBAH","WBAO","WBHO","WIAH","WIAO","WIHO","WAHO","BIAH","BIAO","BAHO","BIHO","IAHO",
+                                     "WBIAH","WBIAO","WBIHO","WBAHO","WIAHO","BIAHO",
+                                     "WBIAHO"))
 table(multirace.other, droplevels(demog$multirace02), exclude=NULL)
+
+#lets also look at the distribution of race for those who reported other
+#alone or in combination
+table(multirace.other[!is.na(other02) & other02==TRUE], exclude=NULL)
+
+#compare to hispanic question in 2002
+demog$hispanic <- ifelse(demog$S1224800<0, NA, demog$S1224800)==1
+
+table(demog$multirace02, demog$hispanic)
 
 # Collect Roster Data -----------------------------------------------------
 
@@ -322,7 +332,8 @@ summary(parents)
 demog <- subset(demog,
                 select = c("id","gender","age","urban97","region97","migration",
                            "moved_out","family","hhinc","highparented","asvab",
-                           "gpa_overall","enrollment02","multirace02","hhsize"))
+                           "gpa_overall","enrollment02","multirace02","hhsize",
+                           "hispanic"))
 
 parents <- subset(parents,
                   select=c("id","informant","fage","mage","mixedrace_parent",
@@ -351,5 +362,12 @@ with(nlsy, table(multirace02, mixedrace_parent, exclude=NULL))
 
 #table of parents race
 with(nlsy, table(frace, mrace, exclude=NULL))
+
+#table of hispanic by mixedrace_parent
+with(nlsy, table(mixedrace_parent, hispanic, exclude=NULL))
+
+#what proportion of those who identified as Hispanic had at least
+#one Hispanic-identified parent.
+with(subset(nlsy, hispanic), mean(grepl("H",mixedrace_parent)))
 
 save(nlsy, file="output/nlsy_processed.RData")
